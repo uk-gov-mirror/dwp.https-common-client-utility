@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+    <suppress>
+        <notes><![CDATA[
+      ignore jackson XMLMapper issue CVE-2016-7051 until fixed -> https://github.com/FasterXML/jackson-core/issues/371
+      ]]></notes>
+        <gav regex="true">com\.fasterxml\.jackson.*:jackson.*</gav>
+        <cve>CVE-2016-7051</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jetty-setuid-java-1.0.3.jar
+   ]]></notes>
+        <gav regex="true">^org\.eclipse\.jetty\.toolchain\.setuid:jetty-setuid-java:.*$</gav>
+        <cve>CVE-2017-9735</cve>
+    </suppress>
+</suppressions>
