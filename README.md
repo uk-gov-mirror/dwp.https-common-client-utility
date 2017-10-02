@@ -45,7 +45,7 @@ Construct for one way server authentication that verifies the endpoint is trustw
 
 `public TLSConnectionBuilder(String trustStoreFilename, String trustStorePassword)`
 
-##### Mutually trust connection
+##### Mutually trusted connection
 
 Construct a 2 way (mutually) secure TLS connection using a trust store (with associated password) to verify the server certificate
 and a keystore (with password) to present to target server for server-based mutual certificate trust authentication
