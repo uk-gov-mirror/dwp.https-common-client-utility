@@ -6,7 +6,7 @@
 
     <groupId>dwp-utility</groupId>
     <artifactId>secure-sockets</artifactId>
-    <version>1.2</version>
+    <version>1.3</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -16,6 +16,7 @@
         <jetty.version>9.4.6.v20170531</jetty.version>
         <wiremock.version>2.6.0</wiremock.version>
         <mockito.version>1.10.19</mockito.version>
+        <slf4j.version>1.7.12</slf4j.version>
         <junit.version>4.11</junit.version>
     </properties>
 
@@ -33,6 +34,11 @@
     </pluginRepositories>
     
     <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>

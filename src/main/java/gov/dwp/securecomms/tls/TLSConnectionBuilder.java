@@ -11,6 +11,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -58,15 +59,14 @@ public class TLSConnectionBuilder {
     }
 
     /**
-     * Builds and configures the TLS connection based on the available set-up parameters
+     * Builds and configures the sslContext using the class properties and settings
      * <p>
      * If the keystore file path or the truststore file path are null or empty they will
      * not be included as part of the SSL context setup.  If the path is not null it will
      * be checked for validity with a TLS exception being thrown if the path does not point
      * to a real file.
-     * s
      *
-     * @return The configured secure Https client connection
+     * @return The configured sslContext object
      * @throws KeyStoreException         - keystore is not correctly configured
      * @throws IOException               - truststore/keystore files do not exist
      * @throws CertificateException      - bad cert
@@ -75,7 +75,7 @@ public class TLSConnectionBuilder {
      * @throws KeyManagementException    - general keystore exception
      * @throws TLSGeneralException       - TLSConnectionBuilder exception
      */
-    public CloseableHttpClient configureSSLConnection() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException, TLSGeneralException {
+    public SSLContext createAndPopulateContext() throws NoSuchAlgorithmException, KeyStoreException, TLSGeneralException, IOException, CertificateException, UnrecoverableKeyException, KeyManagementException {
         TrustManagerFactory trustStoreManager = null;
         KeyManagerFactory keyStoreManager = null;
         KeyStore clientKeyStore = null;
@@ -104,8 +104,30 @@ public class TLSConnectionBuilder {
                 (trustStore == null) ? null : trustStoreManager.getTrustManagers(),
                 new SecureRandom());
 
+        return sslContext;
+    }
+
+    /**
+     * Builds and configures the TLS connection based on the available set-up parameters
+     * <p>
+     * If the keystore file path or the truststore file path are null or empty they will
+     * not be included as part of the SSL context setup.  If the path is not null it will
+     * be checked for validity with a TLS exception being thrown if the path does not point
+     * to a real file.
+     * s
+     *
+     * @return The configured secure Https client connection
+     * @throws KeyStoreException         - keystore is not correctly configured
+     * @throws IOException               - truststore/keystore files do not exist
+     * @throws CertificateException      - bad cert
+     * @throws NoSuchAlgorithmException  - bad cert
+     * @throws UnrecoverableKeyException - keystore internal error
+     * @throws KeyManagementException    - general keystore exception
+     * @throws TLSGeneralException       - TLSConnectionBuilder exception
+     */
+    public CloseableHttpClient configureSSLConnection() throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException, TLSGeneralException {
         HttpClientBuilder builder = HttpClientBuilder.create();
-        builder.setSSLContext(sslContext);
+        builder.setSSLContext(createAndPopulateContext());
         return builder.build();
     }
 
