@@ -1,9 +1,10 @@
-package gov.dwp.securecomms.tls;
+package uk.gov.dwp.tls;
 
-import gov.dwp.utilities.crypto.SecureStrings;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
+import uk.gov.dwp.crypto.SecureStrings;
+import uk.gov.dwp.logging.DwpEncodedLogger;
 
 import javax.crypto.SealedObject;
 import javax.net.ssl.KeyManagerFactory;
@@ -11,7 +12,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -22,7 +22,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 public class TLSConnectionBuilder {
-    private static final Logger LOG = Logger.getLogger(TLSConnectionBuilder.class.getName());
+    private static final Logger LOG = DwpEncodedLogger.getLogger(TLSConnectionBuilder.class.getName());
     private static final SecureStrings secureCipher = new SecureStrings();
     private String trustStoreFile;
     private SealedObject trustStorePassword;

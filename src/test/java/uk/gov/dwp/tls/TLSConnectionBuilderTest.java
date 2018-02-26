@@ -1,7 +1,8 @@
-package gov.dwp.securecomms.tls;
+package uk.gov.dwp.tls;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.apache.http.client.ClientProtocolException;
+import uk.gov.dwp.tls.TLSConnectionBuilder;
+import uk.gov.dwp.tls.TLSGeneralException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;

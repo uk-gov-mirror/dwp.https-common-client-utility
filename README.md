@@ -10,34 +10,19 @@ properties entry in pom
     <properties>
         <dwp.secure-sockets.version>x.x</dwp.secure-sockets.version>
     </properties>
-    
-internal Artifactory repository reference is required (plugin reference required for OWASP checks)
-
-    <repositories>
-        <repository>
-            <id>dwp internal</id>
-            <url>###REPOSITORY_URL###</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>dwp internal</id>
-            <url>###REPOSITORY_URL###</url>
-        </pluginRepository>
-    </pluginRepositories>
 
 dependency reference
 
     <dependency>
-        <groupId>dwp-utility</groupId>
+        <groupId>uk.gov.dwp.tls</groupId>
         <artifactId>secure-sockets</artifactId>
         <version>${dwp.secure-sockets.version}</version>
     </dependency>
     
 #### Example of use
 
-    import gov.dwp.securecomms.tls.TLSConnectionBuilder;
-    import gov.dwp.securecomms.tls.TLSGeneralException;
+    import uk.gov.dwp.tls.TLSConnectionBuilder;
+    import uk.gov.dwp.tls.TLSGeneralException;
 
 ##### Target connection trust
 
@@ -50,6 +35,6 @@ Construct for one way server authentication that verifies the endpoint is trustw
 Construct a 2 way (mutually) secure TLS connection using a trust store (with associated password) to verify the server certificate
 and a keystore (with password) to present to target server for server-based mutual certificate trust authentication
 
-`public TLSConnectionBuilder(String trustStoreFilename, String trustStorePassword, String keyStoreFilename, String keyStorePassword)`
+    public TLSConnectionBuilder(String trustStoreFilename, String trustStorePassword, String keyStoreFilename, String keyStorePassword)
 
 
