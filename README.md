@@ -1,4 +1,6 @@
 ## secure-sockets
+[![Build Status](https://travis-ci.org/dwp/https-common-client-utility.svg?branch=master)](https://travis-ci.org/dwp/https-common-client-utility) [![Known Vulnerabilities](https://snyk.io/test/github/dwp/https-common-client-utility/badge.svg)](https://snyk.io/test/github/dwp/https-common-client-utility)
+
 An encapsulated class to manage the standard creation of single and mutually authenticated HTTPS connections.  Run with VM java options for extra debugging information of the secure socket transaction traffic.
 
 `-Djava.security.debug=certpath -Djavax.net.debug=ssl`
