@@ -2,7 +2,7 @@ package uk.gov.dwp.tls;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import uk.gov.dwp.crypto.SecureStrings;
 import uk.gov.dwp.logging.DwpEncodedLogger;
 
