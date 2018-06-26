@@ -3,8 +3,8 @@ package uk.gov.dwp.tls;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.dwp.crypto.SecureStrings;
-import uk.gov.dwp.logging.DwpEncodedLogger;
 
 import javax.crypto.SealedObject;
 import javax.net.ssl.KeyManagerFactory;
@@ -22,7 +22,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 public class TLSConnectionBuilder {
-    private static final Logger LOG = DwpEncodedLogger.getLogger(TLSConnectionBuilder.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TLSConnectionBuilder.class.getName());
     private static final SecureStrings secureCipher = new SecureStrings();
     private String trustStoreFile;
     private SealedObject trustStorePassword;

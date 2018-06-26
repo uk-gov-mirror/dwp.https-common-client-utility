@@ -6,7 +6,7 @@
 
     <groupId>uk.gov.dwp.tls</groupId>
     <artifactId>secure-sockets</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Encapsulated class to offer a common patter to create trust and mutually authenticated HTTPS connections</description>
@@ -37,7 +37,6 @@
 
     <properties>
         <dwp.securestrings.version>1.4.0</dwp.securestrings.version>
-        <dwp.encoded_logger>1.2.0</dwp.encoded_logger>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <apache.httpclient.version>4.5.3</apache.httpclient.version>
@@ -56,9 +55,9 @@
     
     <dependencies>
         <dependency>
-            <groupId>uk.gov.dwp.logging</groupId>
-            <artifactId>encoded-logger-output</artifactId>
-            <version>${dwp.encoded_logger}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
