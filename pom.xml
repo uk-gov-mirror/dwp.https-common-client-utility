@@ -6,7 +6,7 @@
 
     <groupId>uk.gov.dwp.tls</groupId>
     <artifactId>secure-sockets</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Encapsulated class to offer a common patter to create trust and mutually authenticated HTTPS connections</description>
@@ -36,7 +36,7 @@
     </scm>
 
     <properties>
-        <dwp.securestrings.version>1.4.0</dwp.securestrings.version>
+        <dwp.securestrings.version>1.5.0</dwp.securestrings.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <apache.httpclient.version>4.5.3</apache.httpclient.version>
