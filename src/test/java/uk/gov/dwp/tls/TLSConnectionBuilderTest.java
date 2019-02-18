@@ -1,8 +1,6 @@
 package uk.gov.dwp.tls;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import uk.gov.dwp.tls.TLSConnectionBuilder;
-import uk.gov.dwp.tls.TLSGeneralException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -26,27 +24,28 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+@SuppressWarnings("squid:S1192") // allow string literals in tests
 @RunWith(MockitoJUnitRunner.class)
 public class TLSConnectionBuilderTest {
 
-    private final String CLIENT_TRUST_STORE_PATH = "src/test/resources/client-to-example-server-service-client.ts";
-    private final String CLIENT_KEY_STORE_PATH = "src/test/resources/client-to-example-server-service-client.ks";
-    private final String UNKNOWN_CLIENT_KEYSTORE_PATH = "src/test/resources/unknown-client.ks";
-    private final String SERVER_TRUST_STORE_PATH = "src/test/resources/example-tls-server.ts";
-    private final String SERVER_KEY_STORE_PATH = "src/test/resources/example-tls-server.ks";
-    private final String TRUST_STORE_PASS = "password";
-    private final String KEY_STORE_PASS = "password";
+    private static final String CLIENT_TRUST_STORE_PATH = "src/test/resources/client-to-example-server-service-client.ts";
+    private static final String CLIENT_KEY_STORE_PATH = "src/test/resources/client-to-example-server-service-client.ks";
+    private static final String UNKNOWN_CLIENT_KEYSTORE_PATH = "src/test/resources/unknown-client.ks";
+    private static final String SERVER_TRUST_STORE_PATH = "src/test/resources/example-tls-server.ts";
+    private static final String SERVER_KEY_STORE_PATH = "src/test/resources/example-tls-server.ks";
+    private static final String TRUST_STORE_PASS = "password";
+    private static final String KEY_STORE_PASS = "password";
 
-    private final String TRUST_ONLY_WEB_ENDPOINT = "https://127.0.0.1:7777/test";
-    private final String MUTUAL_AUTH_WEB_ENDPOINT = "https://127.0.0.1:7778/test";
+    private static final String TRUST_ONLY_WEB_ENDPOINT = "https://127.0.0.1:7777/test";
+    private static final String MUTUAL_AUTH_WEB_ENDPOINT = "https://127.0.0.1:7778/test";
 
     @Rule
-    public WireMockRule correctTrustAuthWireMock_SERVER = new WireMockRule(wireMockConfig()
+    public WireMockRule correctTrustAuthWireMockServer = new WireMockRule(wireMockConfig()
             .port(6666)
             .httpsPort(7777)
             .needClientAuth(false)
@@ -57,7 +56,7 @@ public class TLSConnectionBuilderTest {
     );
 
     @Rule
-    public WireMockRule correctMutualAuthWireMock_SERVER = new WireMockRule(wireMockConfig()
+    public WireMockRule correctMutualAuthWireMockServer = new WireMockRule(wireMockConfig()
             .port(6667)
             .httpsPort(7778)
             .needClientAuth(true)
@@ -68,7 +67,7 @@ public class TLSConnectionBuilderTest {
     );
 
     @Rule
-    public WireMockRule unknownTrustAuthWireMock_SERVER = new WireMockRule(wireMockConfig()
+    public WireMockRule unknownTrustAuthWireMockServer = new WireMockRule(wireMockConfig()
             .port(6668)
             .httpsPort(7779)
             .needClientAuth(false)
@@ -78,20 +77,14 @@ public class TLSConnectionBuilderTest {
             .keystorePassword(KEY_STORE_PASS)
     );
 
-    @Test
+    @Test(expected = IOException.class)
     public void defaultSSLConnection() throws IOException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(null, null, null, null);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
-        try {
-            client.execute(httpUriRequest);
-            fail("HTTPS request should not have been successful");
 
-        } catch (IOException e) {
-            assertThat("Should fail with validator.ValidatorException error", e.getMessage().contains("validator.ValidatorException"), is(true));
-            System.out.println(e.getMessage());
-        }
+        client.execute(httpUriRequest);
     }
 
     @Test
@@ -103,7 +96,6 @@ public class TLSConnectionBuilderTest {
 
         } catch (TLSGeneralException e) {
             assertThat("Should fail with tls.TLSGeneralException error", e.getMessage().contains("TLS Exception"), is(true));
-            System.out.println(e.getMessage());
         }
     }
 
@@ -116,7 +108,6 @@ public class TLSConnectionBuilderTest {
 
         } catch (IOException e) {
             assertThat("Should fail with io.IOException error", e.getCause().toString().contains("Password verification failed"), is(true));
-            System.out.println(e.getMessage());
         }
     }
 
@@ -127,28 +118,19 @@ public class TLSConnectionBuilderTest {
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
 
-        correctTrustAuthWireMock_SERVER.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
+        correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
         assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void invalidTrustStoreSSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(MUTUAL_AUTH_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
-        try {
-            client.execute(httpUriRequest);
-            fail("authenticated secure connection should fail due to no keystore elements");
 
-        } catch (SocketException e) {
-            assertThat("Should get an aborted connection from the server", e.getMessage().contains("Software caused connection abort"), is(true));
-            System.out.println(e.getMessage());
-        } catch (SSLHandshakeException e) {
-            assertThat("SSLHandshake error thrown before IOException for mac/redhat from the server", e.getMessage().contains("Remote host closed connection"), is(true));
-            System.out.println(e.getMessage());
-        }
+        client.execute(httpUriRequest);
     }
 
     @Test
@@ -160,7 +142,6 @@ public class TLSConnectionBuilderTest {
 
         } catch (TLSGeneralException e) {
             assertThat("should fail with bad TLSGeneralException", e.getMessage().contains("TLS Exception"), is(true));
-            System.out.println(e.getMessage());
         }
     }
 
@@ -173,39 +154,31 @@ public class TLSConnectionBuilderTest {
 
         } catch (IOException e) {
             assertThat("Should fail with io.IOException error", e.getCause().toString().contains("Password verification failed"), is(true));
-            System.out.println(e.getMessage());
         }
     }
 
 
     @Test
-    public void validTwoWaySSLConnection() throws Exception {
+    public void validTwoWaySSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, CLIENT_KEY_STORE_PATH, KEY_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(MUTUAL_AUTH_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
 
-        correctMutualAuthWireMock_SERVER.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
+        correctMutualAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
         assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void invalidTwoWaySSLConnectionUnknownClientCert() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, UNKNOWN_CLIENT_KEYSTORE_PATH, KEY_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(MUTUAL_AUTH_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
 
-        correctMutualAuthWireMock_SERVER.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
-
-        try {
-            client.execute(httpUriRequest);
-            fail("should fail on handshake");
-
-        } catch (IOException e) {
-            assertThat("should fail with handshake", e.getMessage(), is(equalTo("Remote host closed connection during handshake")));
-        }
+        correctMutualAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
+        client.execute(httpUriRequest);
     }
 
     @Test
@@ -215,7 +188,7 @@ public class TLSConnectionBuilderTest {
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
 
-        correctTrustAuthWireMock_SERVER.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
+        correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         try {
             client.execute(httpUriRequest);
             fail("should fail with handshake");
@@ -226,14 +199,14 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void invalidOneWaySSLConnectionWithUnknownServerCertSent_FromServer() throws IOException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException {
+    public void invalidOneWaySSLConnectionWithUnknownServerCertSentFromServer() throws IOException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, null, null);
         CloseableHttpClient client = testClass.configureSSLConnection();
 
         HttpPost httpUriRequest = new HttpPost("https://127.0.0.1:7779/test");
         httpUriRequest.setEntity(new StringEntity("{}"));
 
-        unknownTrustAuthWireMock_SERVER.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
+        unknownTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
 
         try {
             client.execute(httpUriRequest);
@@ -245,37 +218,37 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void validOneWaySSLConnection() throws Exception {
+    public void validOneWaySSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, null, null);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
 
-        correctTrustAuthWireMock_SERVER.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
+        correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
         assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
     }
 
     @Test
-    public void validOneWaySSLConnectionWithNullKeystore() throws Exception {
+    public void validOneWaySSLConnectionWithNullKeystore() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, null, KEY_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
 
-        correctTrustAuthWireMock_SERVER.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
+        correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
         assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
     }
 
     @Test
-    public void validOneWaySSLConnectionWithEmptyKeystore() throws Exception {
+    public void validOneWaySSLConnectionWithEmptyKeystore() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, "", KEY_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
 
-        correctTrustAuthWireMock_SERVER.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
+        correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
         assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
     }

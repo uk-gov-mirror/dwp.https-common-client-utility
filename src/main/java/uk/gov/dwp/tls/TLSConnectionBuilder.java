@@ -99,7 +99,7 @@ public class TLSConnectionBuilder {
             LOG.info("Cannot use KEYSTORE, proceeding without keystore.  It is blank or null");
         }
 
-        SSLContext sslContext = SSLContext.getInstance("TLS");
+        SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
         sslContext.init((clientKeyStore == null) ? null : keyStoreManager.getKeyManagers(),
                 (trustStore == null) ? null : trustStoreManager.getTrustManagers(),
                 new SecureRandom());
