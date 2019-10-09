@@ -6,7 +6,7 @@
 
     <groupId>uk.gov.dwp.tls</groupId>
     <artifactId>secure-sockets</artifactId>
-    <version>1.6.2</version>
+    <version>1.6.3</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Encapsulated class to offer a common patter to create trust and mutually authenticated HTTPS connections</description>
@@ -46,13 +46,13 @@
         <mvn-source.version>3.0.1</mvn-source.version>
         <wiremock.version>2.6.0</wiremock.version>
         <mockito.version>1.10.19</mockito.version>
-        <jackson.version>2.9.8</jackson.version>
+        <jackson.version>2.10.0</jackson.version>
         <mvn-gpg.version>1.6</mvn-gpg.version>
         <slf4j.version>1.7.25</slf4j.version>
         <owasp.version>4.0.2</owasp.version>
         <junit.version>4.12</junit.version>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
