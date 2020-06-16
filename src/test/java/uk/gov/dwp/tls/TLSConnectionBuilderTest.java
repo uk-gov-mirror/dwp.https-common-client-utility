@@ -10,9 +10,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.net.SocketException;
+import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -78,7 +81,7 @@ public class TLSConnectionBuilderTest {
     );
 
     @Test(expected = IOException.class)
-    public void defaultSSLConnection() throws IOException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException {
+    public void defaultSSLConnection() throws IOException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(null, null, null, null);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
@@ -88,7 +91,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void badTrustStorePath() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+    public void badTrustStorePath() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder("/bad-path/trustStore.ts", TRUST_STORE_PASS);
         try {
             testClass.configureSSLConnection();
@@ -100,7 +103,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void badTrustStorePassword() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException {
+    public void badTrustStorePassword() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, IOException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, "badpassword");
         try {
             testClass.configureSSLConnection();
@@ -112,7 +115,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void validTrustStoreSSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
+    public void validTrustStoreSSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
@@ -124,7 +127,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test(expected = IOException.class)
-    public void invalidTrustStoreSSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
+    public void invalidTrustStoreSSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(MUTUAL_AUTH_WEB_ENDPOINT);
@@ -134,7 +137,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void badKeyStorePath() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+    public void badKeyStorePath() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, "/bad-path/keyStore.ks", KEY_STORE_PASS);
         try {
             testClass.configureSSLConnection();
@@ -146,7 +149,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void badKeyStorePassword() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException {
+    public void badKeyStorePassword() throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, IOException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, CLIENT_KEY_STORE_PATH, "badpassword");
         try {
             testClass.configureSSLConnection();
@@ -159,7 +162,7 @@ public class TLSConnectionBuilderTest {
 
 
     @Test
-    public void validTwoWaySSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
+    public void validTwoWaySSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, CLIENT_KEY_STORE_PATH, KEY_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(MUTUAL_AUTH_WEB_ENDPOINT);
@@ -171,7 +174,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test(expected = IOException.class)
-    public void invalidTwoWaySSLConnectionUnknownClientCert() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
+    public void invalidTwoWaySSLConnectionUnknownClientCert() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, UNKNOWN_CLIENT_KEYSTORE_PATH, KEY_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(MUTUAL_AUTH_WEB_ENDPOINT);
@@ -182,7 +185,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void invalidOneWaySSLConnectionWithUnknownServerCert() throws IOException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException {
+    public void invalidOneWaySSLConnectionWithUnknownServerCert() throws IOException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder("src/test/resources/unknown-client.ts", TRUST_STORE_PASS, null, null);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
@@ -199,7 +202,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void invalidOneWaySSLConnectionWithUnknownServerCertSentFromServer() throws IOException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException {
+    public void invalidOneWaySSLConnectionWithUnknownServerCertSentFromServer() throws IOException, CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, null, null);
         CloseableHttpClient client = testClass.configureSSLConnection();
 
@@ -218,7 +221,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void validOneWaySSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
+    public void validOneWaySSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, null, null);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
@@ -230,7 +233,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void validOneWaySSLConnectionWithNullKeystore() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
+    public void validOneWaySSLConnectionWithNullKeystore() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, null, KEY_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
@@ -242,7 +245,7 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void validOneWaySSLConnectionWithEmptyKeystore() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException {
+    public void validOneWaySSLConnectionWithEmptyKeystore() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, "", KEY_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);

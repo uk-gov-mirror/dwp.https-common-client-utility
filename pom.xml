@@ -6,7 +6,7 @@
 
     <groupId>uk.gov.dwp.tls</groupId>
     <artifactId>secure-sockets</artifactId>
-    <version>1.6.3</version>
+    <version>1.7.0</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Encapsulated class to offer a common patter to create trust and mutually authenticated HTTPS connections</description>
@@ -36,21 +36,22 @@
     </scm>
 
     <properties>
-        <dwp.securestrings.version>1.5.0</dwp.securestrings.version>
+        <dwp.securestrings.version>1.5.3</dwp.securestrings.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <apache.httpclient.version>4.5.3</apache.httpclient.version>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <mvn-javadoc.version>2.10.4</mvn-javadoc.version>
+        <maven.compiler.version>3.8.1</maven.compiler.version>
+        <mvn-javadoc.version>3.2.0</mvn-javadoc.version>
         <mvn-source.version>3.0.1</mvn-source.version>
         <wiremock.version>2.6.0</wiremock.version>
         <mockito.version>1.10.19</mockito.version>
         <jackson.version>2.10.0</jackson.version>
+        <jacoco.version>0.8.5</jacoco.version>
         <mvn-gpg.version>1.6</mvn-gpg.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <owasp.version>4.0.2</owasp.version>
+        <owasp.version>5.3.0</owasp.version>
         <junit.version>4.12</junit.version>
+        <java.version>11</java.version>
     </properties>
 
     <dependencies>
@@ -154,6 +155,35 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-complete</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>${maven.compiler.version}</version>
+            </plugin>
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
