@@ -50,7 +50,7 @@
         <mvn-gpg.version>1.6</mvn-gpg.version>
         <slf4j.version>1.7.25</slf4j.version>
         <owasp.version>5.3.0</owasp.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <java.version>11</java.version>
     </properties>
 
