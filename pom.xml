@@ -6,7 +6,7 @@
 
     <groupId>uk.gov.dwp.tls</groupId>
     <artifactId>secure-sockets</artifactId>
-    <version>1.7.0</version>
+    <version>1.8.0</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Encapsulated class to offer a common patter to create trust and mutually authenticated HTTPS connections</description>
@@ -39,19 +39,22 @@
         <dwp.securestrings.version>1.5.3</dwp.securestrings.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <apache.httpclient.version>4.5.3</apache.httpclient.version>
+        <apache.httpclient.version>4.5.13</apache.httpclient.version>
         <maven.compiler.version>3.8.1</maven.compiler.version>
         <mvn-javadoc.version>3.2.0</mvn-javadoc.version>
         <mvn-source.version>3.0.1</mvn-source.version>
         <wiremock.version>2.6.0</wiremock.version>
         <mockito.version>1.10.19</mockito.version>
-        <jackson.version>2.10.0</jackson.version>
+        <jackson.version>2.13.0</jackson.version>
         <jacoco.version>0.8.5</jacoco.version>
         <mvn-gpg.version>1.6</mvn-gpg.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <owasp.version>5.3.0</owasp.version>
+        <owasp.version>6.1.6</owasp.version>
         <junit.version>4.12</junit.version>
         <java.version>11</java.version>
+
+        <plugin.surefire.version>2.22.0</plugin.surefire.version>
+        <plugin.spotbugs.version>4.0.0</plugin.spotbugs.version>
     </properties>
 
     <dependencies>
@@ -161,19 +164,61 @@
                 <version>${jacoco.version}</version>
                 <executions>
                     <execution>
-                        <id>jacoco-initialize</id>
+                        <id>default-prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <propertyName>jacocoArgLine</propertyName>
+                        </configuration>
                     </execution>
                     <execution>
-                        <id>jacoco-complete</id>
-                        <phase>verify</phase>
+                        <id>default-report</id>
                         <goals>
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <!-- All classes must have 80% line and 75% branch coverage . Note we use 2 d.p so that we get can any check failure messages reported to 2 d.p  -->
+                                <rule>
+                                    <element>CLASS</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.75</minimum>
+                                        </limit>
+                                    </limits>
+                                    <excludes>
+                                        <exclude>uk.gov.dwp.health.utilities.items.*</exclude>
+                                    </excludes>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${plugin.surefire.version}</version>
+                <configuration>
+                    <argLine>${jacocoArgLine} -Xmx256m</argLine>
+                    <excludes>
+                        <exclude>**/CryptoDataManagerTest*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -191,7 +236,6 @@
                 <configuration>
                     <cveValidForHours>12</cveValidForHours>
                     <failBuildOnCVSS>4</failBuildOnCVSS>
-                    <suppressionFile>src/test/resources/DependencySuppression.xml</suppressionFile>
                 </configuration>
                 <executions>
                     <execution>
@@ -240,6 +284,18 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${plugin.spotbugs.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs</artifactId>
+                        <version>${plugin.spotbugs.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>

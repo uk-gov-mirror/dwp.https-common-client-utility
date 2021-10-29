@@ -111,10 +111,12 @@ public class TLSConnectionBuilder {
       trustStoreManager =
           TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
       trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-      trustStore.load(
-          new FileInputStream(checkFile(getTrustStoreFile())),
-          getTrustStorePassword().toCharArray());
-      trustStoreManager.init(trustStore);
+
+      try (FileInputStream trustStoreFs = new FileInputStream(checkFile(getTrustStoreFile()))) {
+        trustStore.load(trustStoreFs, getTrustStorePassword().toCharArray());
+        trustStoreManager.init(trustStore);
+      }
+
     } else {
       LOG.info("Cannot use TRUSTSTORE, proceeding without trust anchors.  It is blank or null");
     }
@@ -122,8 +124,11 @@ public class TLSConnectionBuilder {
     if (getKeyStoreFile() != null && getKeyStoreFile().trim().length() > 0) {
       keyStoreManager = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
       clientKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-      clientKeyStore.load(
-          new FileInputStream(checkFile(getKeyStoreFile())), getKeyStorePassword().toCharArray());
+
+      try (FileInputStream keyStoreFs = new FileInputStream(checkFile(getKeyStoreFile()))) {
+        clientKeyStore.load(keyStoreFs, getKeyStorePassword().toCharArray());
+      }
+
       keyStoreManager.init(clientKeyStore, getKeyStorePassword().toCharArray());
     } else {
       LOG.info("Cannot use KEYSTORE, proceeding without keystore.  It is blank or null");
