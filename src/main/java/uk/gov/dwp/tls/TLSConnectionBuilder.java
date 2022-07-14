@@ -1,5 +1,6 @@
 package uk.gov.dwp.tls;
 
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.concurrent.TimeUnit;
 
 public class TLSConnectionBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(TLSConnectionBuilder.class.getName());
@@ -165,6 +167,41 @@ public class TLSConnectionBuilder {
     HttpClientBuilder builder = HttpClientBuilder.create();
     builder.setSSLContext(createAndPopulateContext());
     return builder.build();
+  }
+
+  /**
+   * Builds and configures the TLS connection based on the available set-up parameters and
+   * introduces a global connection and socket timeout
+   *
+   * <p>If the keystore file path or the truststore file path are null or empty they will not be
+   * included as part of the SSL context setup. If the path is not null it will be checked for
+   * validity with a TLS exception being thrown if the path does not point to a real file. s
+   *
+   * @param globalTimeoutSeconds - time in seconds for connection, socket and pool timeout
+   * @return The configured secure Https client connection
+   * @throws KeyStoreException - keystore is not correctly configured
+   * @throws IOException - truststore/keystore files do not exist
+   * @throws CertificateException - bad cert
+   * @throws NoSuchAlgorithmException - bad cert
+   * @throws UnrecoverableKeyException - keystore internal error
+   * @throws KeyManagementException - general keystore exception
+   * @throws TLSGeneralException - TLSConnectionBuilder exception
+   */
+  public CloseableHttpClient configureSSLConnection(int globalTimeoutSeconds)
+      throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException,
+          UnrecoverableKeyException, KeyManagementException, TLSGeneralException {
+    HttpClientBuilder builder = HttpClientBuilder.create();
+    RequestConfig config =
+        RequestConfig.custom()
+            .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(globalTimeoutSeconds))
+            .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(globalTimeoutSeconds))
+            .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(globalTimeoutSeconds))
+            .build();
+
+    return builder
+        .setSSLContext(createAndPopulateContext())
+        .setDefaultRequestConfig(config)
+        .build();
   }
 
   /**

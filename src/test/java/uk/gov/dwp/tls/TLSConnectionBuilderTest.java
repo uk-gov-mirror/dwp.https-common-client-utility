@@ -8,13 +8,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
-import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -28,7 +27,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -44,13 +42,13 @@ public class TLSConnectionBuilderTest {
     private static final String TRUST_STORE_PASS = "password";
     private static final String KEY_STORE_PASS = "password";
 
-    private static final String TRUST_ONLY_WEB_ENDPOINT = "https://127.0.0.1:7777/test";
-    private static final String MUTUAL_AUTH_WEB_ENDPOINT = "https://127.0.0.1:7778/test";
+    private static final String TRUST_ONLY_WEB_ENDPOINT = "https://127.0.0.1:9777/test";
+    private static final String MUTUAL_AUTH_WEB_ENDPOINT = "https://127.0.0.1:9778/test";
 
     @Rule
     public WireMockRule correctTrustAuthWireMockServer = new WireMockRule(wireMockConfig()
-            .port(6666)
-            .httpsPort(7777)
+            .port(9666)
+            .httpsPort(9777)
             .needClientAuth(false)
             .trustStorePath(SERVER_TRUST_STORE_PATH)
             .trustStorePassword(TRUST_STORE_PASS)
@@ -60,8 +58,8 @@ public class TLSConnectionBuilderTest {
 
     @Rule
     public WireMockRule correctMutualAuthWireMockServer = new WireMockRule(wireMockConfig()
-            .port(6667)
-            .httpsPort(7778)
+            .port(9667)
+            .httpsPort(9778)
             .needClientAuth(true)
             .trustStorePath(SERVER_TRUST_STORE_PATH)
             .trustStorePassword(TRUST_STORE_PASS)
@@ -71,8 +69,8 @@ public class TLSConnectionBuilderTest {
 
     @Rule
     public WireMockRule unknownTrustAuthWireMockServer = new WireMockRule(wireMockConfig()
-            .port(6668)
-            .httpsPort(7779)
+            .port(9668)
+            .httpsPort(9779)
             .needClientAuth(false)
             .trustStorePath(SERVER_TRUST_STORE_PATH)
             .trustStorePassword(TRUST_STORE_PASS)
@@ -115,13 +113,36 @@ public class TLSConnectionBuilderTest {
     }
 
     @Test
-    public void validTrustStoreSSLConnection() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
+    public void validTrustStoreSSLConnectionInfiniteSocketTimeout() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS);
         CloseableHttpClient client = testClass.configureSSLConnection();
         HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
         httpUriRequest.setEntity(new StringEntity("{}"));
 
         correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
+        CloseableHttpResponse response = client.execute(httpUriRequest);
+        assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
+    }
+
+    @Test(expected = SocketTimeoutException.class)
+    public void validTrustStoreSSLConnectionShortTimeoutFails() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
+        TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS);
+        CloseableHttpClient client = testClass.configureSSLConnection(2);
+        HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
+        httpUriRequest.setEntity(new StringEntity("{}"));
+
+        correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withFixedDelay(3000).withStatus(200)));
+        CloseableHttpResponse response = client.execute(httpUriRequest);
+    }
+
+    @Test
+    public void validTrustStoreSSLConnectionShortTimeoutPasses() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, TLSGeneralException, IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException {
+        TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS);
+        CloseableHttpClient client = testClass.configureSSLConnection(4);
+        HttpPost httpUriRequest = new HttpPost(TRUST_ONLY_WEB_ENDPOINT);
+        httpUriRequest.setEntity(new StringEntity("{}"));
+
+        correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withFixedDelay(3000).withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
         assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
     }
@@ -206,7 +227,7 @@ public class TLSConnectionBuilderTest {
         TLSConnectionBuilder testClass = new TLSConnectionBuilder(CLIENT_TRUST_STORE_PATH, TRUST_STORE_PASS, null, null);
         CloseableHttpClient client = testClass.configureSSLConnection();
 
-        HttpPost httpUriRequest = new HttpPost("https://127.0.0.1:7779/test");
+        HttpPost httpUriRequest = new HttpPost("https://127.0.0.1:9779/test");
         httpUriRequest.setEntity(new StringEntity("{}"));
 
         unknownTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
