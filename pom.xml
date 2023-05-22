@@ -6,7 +6,7 @@
 
     <groupId>uk.gov.dwp.tls</groupId>
     <artifactId>secure-sockets</artifactId>
-    <version>1.9.0</version>
+    <version>1.10.0</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Encapsulated class to offer a common patter to create trust and mutually authenticated HTTPS connections</description>
@@ -36,25 +36,26 @@
     </scm>
 
     <properties>
-        <dwp.securestrings.version>1.6.0-6ce91523</dwp.securestrings.version>
+        <dwp.securestrings.version>1.7.0-7d6dd346</dwp.securestrings.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <apache.httpclient.version>4.5.13</apache.httpclient.version>
-        <maven.compiler.version>3.8.1</maven.compiler.version>
-        <mvn-javadoc.version>3.2.0</mvn-javadoc.version>
-        <mvn-source.version>3.0.1</mvn-source.version>
+        <apache.httpclient.version>4.5.14</apache.httpclient.version>
+        <maven.compiler.version>3.11.0</maven.compiler.version>
+        <mvn-javadoc.version>3.5.0</mvn-javadoc.version>
+        <mvn-source.version>3.2.1</mvn-source.version>
         <wiremock.version>2.27.2</wiremock.version>
-        <mockito.version>4.5.1</mockito.version>
-        <jackson.version>2.13.3</jackson.version>
-        <jacoco.version>0.8.5</jacoco.version>
+        <mockito.version>4.11.0</mockito.version>
+        <jackson.version>2.15.1</jackson.version>
+        <jacoco.version>0.8.10</jacoco.version>
         <mvn-gpg.version>1.6</mvn-gpg.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <owasp.version>7.1.0</owasp.version>
+        <owasp.version>8.2.1</owasp.version>
         <junit.version>4.13.2</junit.version>
         <java.version>11</java.version>
 
-        <plugin.surefire.version>2.22.0</plugin.surefire.version>
-        <plugin.spotbugs.version>4.0.0</plugin.spotbugs.version>
+        <plugin.surefire.version>2.22.2</plugin.surefire.version>
+        <plugin.maven.spotbugs.version>4.7.3.4</plugin.maven.spotbugs.version>
+        <plugin.spotbugs.version>4.7.3</plugin.spotbugs.version>
     </properties>
 
     <dependencies>
@@ -246,7 +247,7 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>${plugin.spotbugs.version}</version>
+                <version>${plugin.maven.spotbugs.version}</version>
                 <dependencies>
                     <dependency>
                         <groupId>com.github.spotbugs</groupId>
