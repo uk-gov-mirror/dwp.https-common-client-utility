@@ -1,8 +1,13 @@
 package uk.gov.dwp.tls;
 
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.dwp.crypto.SecureStrings;
@@ -109,7 +114,7 @@ public class TLSConnectionBuilder {
     KeyStore clientKeyStore = null;
     KeyStore trustStore = null;
 
-    if (getTrustStoreFile() != null && getTrustStoreFile().trim().length() > 0) {
+    if (getTrustStoreFile() != null && !getTrustStoreFile().trim().isEmpty()) {
       trustStoreManager =
           TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
       trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -123,7 +128,7 @@ public class TLSConnectionBuilder {
       LOG.info("Cannot use TRUSTSTORE, proceeding without trust anchors.  It is blank or null");
     }
 
-    if (getKeyStoreFile() != null && getKeyStoreFile().trim().length() > 0) {
+    if (getKeyStoreFile() != null && !getKeyStoreFile().trim().isEmpty()) {
       keyStoreManager = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
       clientKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
@@ -135,7 +140,6 @@ public class TLSConnectionBuilder {
     } else {
       LOG.info("Cannot use KEYSTORE, proceeding without keystore.  It is blank or null");
     }
-
     SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
     sslContext.init(
         (clientKeyStore == null) ? null : keyStoreManager.getKeyManagers(),
@@ -165,7 +169,12 @@ public class TLSConnectionBuilder {
       throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException,
           UnrecoverableKeyException, KeyManagementException, TLSGeneralException {
     HttpClientBuilder builder = HttpClientBuilder.create();
-    builder.setSSLContext(createAndPopulateContext());
+    new DefaultClientTlsStrategy(createAndPopulateContext());
+    PoolingHttpClientConnectionManager poolingHttpClientConnectionManager =
+            PoolingHttpClientConnectionManagerBuilder.create()
+            .setTlsSocketStrategy(new DefaultClientTlsStrategy(createAndPopulateContext()))
+            .build();
+    builder.setConnectionManager(poolingHttpClientConnectionManager);
     return builder.build();
   }
 
@@ -193,13 +202,22 @@ public class TLSConnectionBuilder {
     HttpClientBuilder builder = HttpClientBuilder.create();
     RequestConfig config =
         RequestConfig.custom()
-            .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(globalTimeoutSeconds))
-            .setSocketTimeout((int) TimeUnit.SECONDS.toMillis(globalTimeoutSeconds))
-            .setConnectionRequestTimeout((int) TimeUnit.SECONDS.toMillis(globalTimeoutSeconds))
+            .setConnectTimeout(Timeout.of(TimeUnit.SECONDS.toMillis(globalTimeoutSeconds),
+                    TimeUnit.MILLISECONDS))
+            .setConnectionRequestTimeout(Timeout.of(TimeUnit.SECONDS.toMillis(globalTimeoutSeconds),
+                    TimeUnit.MILLISECONDS))
             .build();
-
+    SocketConfig socketConfig = SocketConfig.custom()
+            .setSoTimeout(Timeout.of(TimeUnit.SECONDS.toMillis(globalTimeoutSeconds),
+                    TimeUnit.MILLISECONDS))
+            .build();
+    PoolingHttpClientConnectionManager poolingHttpClientConnectionManager =
+            PoolingHttpClientConnectionManagerBuilder.create()
+            .setDefaultSocketConfig(socketConfig)
+            .setTlsSocketStrategy(new DefaultClientTlsStrategy(createAndPopulateContext()))
+            .build();
     return builder
-        .setSSLContext(createAndPopulateContext())
+        .setConnectionManager(poolingHttpClientConnectionManager)
         .setDefaultRequestConfig(config)
         .build();
   }

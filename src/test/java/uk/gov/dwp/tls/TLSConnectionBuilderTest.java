@@ -1,10 +1,10 @@
 package uk.gov.dwp.tls;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -121,7 +121,7 @@ public class TLSConnectionBuilderTest {
 
         correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
-        assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
+        assertThat("200 is expected for this path", response.getCode(), is(200));
     }
 
     @Test(expected = SocketTimeoutException.class)
@@ -144,7 +144,7 @@ public class TLSConnectionBuilderTest {
 
         correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withFixedDelay(3000).withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
-        assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
+        assertThat("200 is expected for this path", response.getCode(), is(200));
     }
 
     @Test(expected = IOException.class)
@@ -191,7 +191,7 @@ public class TLSConnectionBuilderTest {
 
         correctMutualAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
-        assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
+        assertThat("200 is expected for this path", response.getCode(), is(200));
     }
 
     @Test(expected = IOException.class)
@@ -250,7 +250,7 @@ public class TLSConnectionBuilderTest {
 
         correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
-        assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
+        assertThat("200 is expected for this path", response.getCode(), is(200));
     }
 
     @Test
@@ -262,7 +262,7 @@ public class TLSConnectionBuilderTest {
 
         correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
-        assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
+        assertThat("200 is expected for this path", response.getCode(), is(200));
     }
 
     @Test
@@ -274,6 +274,6 @@ public class TLSConnectionBuilderTest {
 
         correctTrustAuthWireMockServer.stubFor(post(urlEqualTo("/test")).willReturn(aResponse().withStatus(200)));
         CloseableHttpResponse response = client.execute(httpUriRequest);
-        assertThat("200 is expected for this path", response.getStatusLine().getStatusCode(), is(200));
+        assertThat("200 is expected for this path", response.getCode(), is(200));
     }
 }

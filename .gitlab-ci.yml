@@ -2,7 +2,7 @@ variables:
   # Product
   PRODUCT: shared
   BUILD_TYPE: MAVEN
-  MAVEN_IMAGE: "maven:3-jdk-11"
+  MAVEN_IMAGE: "maven:3.9.9-eclipse-temurin-17"
   MVN_OPTS: "-DLOG_LEVEL=INFO -Dgpg.skip=true"
   REPO_PATTERN: "V3 CI"
   GITHUB_REPO_NAME: https-common-client-utility
@@ -17,7 +17,6 @@ stages:
   - update-project-metadata
   - create-schedules
   - open-source
-  - repo-gen
 
 include:
   - local: "/gitlab-ci/includes.yml"
